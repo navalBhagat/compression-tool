@@ -21,18 +21,18 @@ Run the following for Windows:
 You can run the tool using: 
 
 ```bash
-TODO
+./compression-tool <filename>
 ```
 
 OR 
 
 ```bash
-TODO
+cat <filename> | ./compression-tool
 ```
 
 If you prefer to not create the executable and directly run this, you can use: 
 
-`make run`
+`make run file=<filename>`
 
 ## Test
 

@@ -5,7 +5,7 @@ build-mac:
 	go build -o compression-tool cmd/compression-tool/main.go
 
 test: 
-	go test ./tests/step1
+	go test ./tests
 
 run: 
-	# go run cmd/compression-tool/main.go ${file} - TODO
+	go run cmd/compression-tool/main.go ${file}
