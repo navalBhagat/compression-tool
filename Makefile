@@ -7,5 +7,8 @@ build-mac:
 test: 
 	go test ./tests
 
+format:
+	go fmt ./...
+
 run: 
 	go run cmd/compression-tool/main.go ${file}

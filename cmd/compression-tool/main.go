@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
-	"compression-tool/pkg/frequencyMap"
 	"fmt"
 	"log"
 	"os"
+
+	"compression-tool/pkg/frequencyMap"
+	"compression-tool/pkg/huffmanEncodingTree"
 )
 
 func main() {
@@ -32,7 +34,9 @@ func main() {
 	if err != nil {
 		fmt.Print("Couldn't calculate frequency map")
 	}
-	fmt.Println(frequencyMap["X"], frequencyMap["t"])
+	huffTree := huffmanEncodingTree.BuildTree(frequencyMap)
+	fmt.Println("Huffman Tree:")
+	huffmanEncodingTree.PrettyPrint(huffTree.RootNode(), "")
 }
 
 func isInputFromPipe() bool {
