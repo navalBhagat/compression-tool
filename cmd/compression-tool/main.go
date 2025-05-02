@@ -2,12 +2,12 @@ package main
 
 import (
 	"bufio"
+	"compression-tool/pkg/frequencyMap"
+	"compression-tool/pkg/huffmanEncodingTree"
+	"compression-tool/pkg/standardFunctions"
 	"fmt"
 	"log"
 	"os"
-
-	"compression-tool/pkg/frequencyMap"
-	"compression-tool/pkg/huffmanEncodingTree"
 )
 
 func main() {
@@ -23,10 +23,10 @@ func main() {
 		defer file.Close()
 		scanner = bufio.NewScanner(file)
 	default:
-		if isInputFromPipe() {
+		if standardFunctions.IsInputFromPipe() {
 			scanner = bufio.NewScanner(os.Stdin)
 		} else {
-			printUsageAndExit()
+			standardFunctions.PrintUsageAndExit()
 		}
 	}
 
@@ -35,16 +35,6 @@ func main() {
 		fmt.Print("Couldn't calculate frequency map")
 	}
 	huffTree := huffmanEncodingTree.BuildTree(frequencyMap)
-	fmt.Println("Huffman Tree:")
-	huffmanEncodingTree.PrettyPrint(huffTree.RootNode(), "")
-}
-
-func isInputFromPipe() bool {
-	stat, _ := os.Stdin.Stat()
-	return (stat.Mode() & os.ModeCharDevice) == 0
-}
-
-func printUsageAndExit() {
-	fmt.Println("Usage: compression-tool <filename> or cat <filename> | compression-tool")
-	os.Exit(1)
+	prefixTable := huffmanEncodingTree.PrefixTable(huffTree)
+	fmt.Println(prefixTable)
 }

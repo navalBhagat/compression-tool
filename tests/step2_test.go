@@ -65,9 +65,8 @@ var expectedTree = huffmanEncodingTree.HuffTree{
 	},
 }
 
-var filename = "./testdata/step2_test.txt"
-
 func testHuffmanTreeFromFile(t *testing.T) {
+	filename := "./testdata/test_small.txt"
 	file, err := os.Open(filename)
 	if err != nil {
 		t.Fatalf("Unable to read file: %v", err)
@@ -84,6 +83,7 @@ func testHuffmanTreeFromFile(t *testing.T) {
 }
 
 func testHuffmanTreeFromStdIn(t *testing.T) {
+	filename := "./testdata/test_small.txt"
 	file, err := os.Open(filename)
 	if err != nil {
 		t.Fatalf("Failed to open test file: %v", err)

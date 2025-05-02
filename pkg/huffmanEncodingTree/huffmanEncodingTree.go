@@ -101,3 +101,20 @@ func PrettyPrint(node HuffBaseNode, prefix string) {
 		PrettyPrint(internal.Right, prefix+strings.Repeat(" ", 4))
 	}
 }
+
+func PrefixTable(tree HuffTree) map[string]string {
+	prefixTable := make(map[string]string)
+	var buildTable func(node HuffBaseNode, prefix string)
+	buildTable = func(node HuffBaseNode, prefix string) {
+		if node.IsLeaf() {
+			leaf := node.(HuffLeafNode)
+			prefixTable[leaf.Element] = prefix
+		} else {
+			internal := node.(HuffInternalNode)
+			buildTable(internal.LeftChild(), prefix+"0")
+			buildTable(internal.RightChild(), prefix+"1")
+		}
+	}
+	buildTable(tree.RootNode(), "")
+	return prefixTable
+}
