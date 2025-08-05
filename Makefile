@@ -10,5 +10,6 @@ test:
 format:
 	go fmt ./...
 
+output ?= output.huff
 run: 
-	go run cmd/compression-tool/main.go ${file}
+	go run cmd/compression-tool/main.go ${file} ${output}

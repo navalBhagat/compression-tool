@@ -1,15 +1,12 @@
 package tests
 
 import (
-	"bufio"
-	"os"
-	"testing"
-
-	"compression-tool/pkg/frequencyMap"
+	"bytes"
 	"compression-tool/pkg/huffmanEncodingTree"
+	"testing"
 )
 
-var expectedTree = huffmanEncodingTree.HuffTree{
+var huffTree = huffmanEncodingTree.HuffTree{
 	Root: huffmanEncodingTree.HuffInternalNode{
 		NodeWeight: 306,
 		Left: huffmanEncodingTree.HuffLeafNode{
@@ -65,40 +62,26 @@ var expectedTree = huffmanEncodingTree.HuffTree{
 	},
 }
 
-func TestHuffmanTreeFromFile(t *testing.T) {
-	filename := "./testdata/test_small.txt"
-	file, err := os.Open(filename)
-	if err != nil {
-		t.Fatalf("Unable to read file: %v", err)
+func TestSerializeTree(t *testing.T) {
+	result := huffmanEncodingTree.SerializeTree(huffTree)
+	expected := []byte{
+		0,      // root internal
+		1, 'E', // left leaf: E
+		0,      // right internal
+		0,      // left internal of right
+		1, 'U', // left leaf: U
+		1, 'D', // right leaf: D
+		0,      // right internal of right
+		1, 'L', // left leaf: L
+		0,      // right internal of right-right
+		1, 'C', // left leaf: C
+		0,      // right internal of right-right-right
+		0,      // left internal of above
+		1, 'Z', // left leaf: Z
+		1, 'K', // right leaf: K
+		1, 'M', // right leaf: M
 	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	freqMap, _ := frequencyMap.CreateFrequencyMap(scanner)
-	huffTree := huffmanEncodingTree.BuildTree(freqMap)
-
-	if huffTree != expectedTree {
-		t.Errorf("Expected to have map %s, but got %s", expectedTree, huffTree)
-	}
-}
-
-func TestHuffmanTreeFromStdIn(t *testing.T) {
-	filename := "./testdata/test_small.txt"
-	file, err := os.Open(filename)
-	if err != nil {
-		t.Fatalf("Failed to open test file: %v", err)
-	}
-	defer file.Close()
-
-	origStdin := os.Stdin
-	defer func() { os.Stdin = origStdin }()
-	os.Stdin = file
-
-	scanner := bufio.NewScanner(os.Stdin)
-	freqMap, _ := frequencyMap.CreateFrequencyMap(scanner)
-	huffTree := huffmanEncodingTree.BuildTree(freqMap)
-
-	if huffTree != expectedTree {
-		t.Errorf("Expected to have map %s, but got %s", expectedTree, huffTree)
+	if !bytes.Equal(result, expected) {
+		t.Errorf("SerializeTree() = %v, want %v", result, expected)
 	}
 }

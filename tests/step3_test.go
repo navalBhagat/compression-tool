@@ -20,7 +20,7 @@ var expectedPrefixTable = map[string]string{
 	"M": "11111",
 }
 
-func testPrefixTableFromFile(t *testing.T) {
+func TestPrefixTableFromFile(t *testing.T) {
 	filename := "./testdata/test_small.txt"
 	file, err := os.Open(filename)
 	if err != nil {
@@ -38,7 +38,7 @@ func testPrefixTableFromFile(t *testing.T) {
 	}
 }
 
-func testPrefixTableFromStdIn(t *testing.T) {
+func TestPrefixTableFromStdIn(t *testing.T) {
 	filename := "./testdata/test_small.txt"
 	file, err := os.Open(filename)
 	if err != nil {

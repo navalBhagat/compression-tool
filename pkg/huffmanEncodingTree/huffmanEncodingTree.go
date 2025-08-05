@@ -1,9 +1,11 @@
 package huffmanEncodingTree
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 type HuffBaseNode interface {
@@ -76,13 +78,36 @@ func BuildTree(freqMap map[string]int) HuffTree {
 		trees = append(trees, NewHuffTree(el, wt))
 	}
 	for len(trees) > 1 {
-		sort.Slice(trees, func(i, j int) bool {
-			return trees[i].Weight() < trees[j].Weight()
-		})
+		sortHuffmanTreesByWeightAndTieBreak(trees)
 		trees = append(trees, CombineTrees(trees[0], trees[1]))
 		trees = trees[2:]
 	}
 	return trees[0]
+}
+
+func sortHuffmanTreesByWeightAndTieBreak(huffmanTrees []HuffTree) {
+	sort.Slice(huffmanTrees, func(i, j int) bool {
+		leftTree := huffmanTrees[i]
+		rightTree := huffmanTrees[j]
+
+		leftWeight := leftTree.Weight()
+		rightWeight := rightTree.Weight()
+
+		if leftWeight != rightWeight {
+			return leftWeight < rightWeight
+		}
+
+		leftLeafNode, leftIsLeaf := leftTree.RootNode().(*HuffLeafNode)
+		rightLeafNode, rightIsLeaf := rightTree.RootNode().(*HuffLeafNode)
+
+		if leftIsLeaf && rightIsLeaf {
+			return leftLeafNode.Element < rightLeafNode.Element
+		}
+
+		leftPointerString := fmt.Sprintf("%p", leftTree.RootNode())
+		rightPointerString := fmt.Sprintf("%p", rightTree.RootNode())
+		return leftPointerString < rightPointerString
+	})
 }
 
 func CombineTrees(t1 HuffTree, t2 HuffTree) HuffTree {
@@ -90,15 +115,15 @@ func CombineTrees(t1 HuffTree, t2 HuffTree) HuffTree {
 	return NewHuffTreeWithChildren(t1.RootNode(), t2.RootNode(), wt)
 }
 
-func PrettyPrint(node HuffBaseNode, prefix string) {
+func PrettyPrintTree(node HuffBaseNode, prefix string) {
 	if node.IsLeaf() {
 		leaf := node.(HuffLeafNode)
 		fmt.Printf("%sLeaf: '%s' (Weight: %d)\n", prefix, leaf.Element, leaf.NodeWeight)
 	} else {
 		internal := node.(HuffInternalNode)
 		fmt.Printf("%sInternal (Weight: %d)\n", prefix, internal.NodeWeight)
-		PrettyPrint(internal.Left, prefix+strings.Repeat(" ", 4))
-		PrettyPrint(internal.Right, prefix+strings.Repeat(" ", 4))
+		PrettyPrintTree(internal.Left, prefix+strings.Repeat(" ", 4))
+		PrettyPrintTree(internal.Right, prefix+strings.Repeat(" ", 4))
 	}
 }
 
@@ -117,4 +142,38 @@ func PrefixTable(tree HuffTree) map[string]string {
 	}
 	buildTable(tree.RootNode(), "")
 	return prefixTable
+}
+
+func SerializeTree(tree HuffTree) []byte {
+	var buffer bytes.Buffer
+	writeNode(tree.RootNode(), &buffer)
+	return buffer.Bytes()
+}
+
+func writeNode(node HuffBaseNode, writer *bytes.Buffer) {
+	if node.IsLeaf() {
+		writer.WriteByte(1)
+		leaf := node.(HuffLeafNode)
+		r, _ := utf8.DecodeRuneInString(leaf.Element)
+		writer.WriteRune(r)
+	} else {
+		writer.WriteByte(0)
+		internal := node.(HuffInternalNode)
+		writeNode(internal.Left, writer)
+		writeNode(internal.Right, writer)
+	}
+}
+
+func PrettyPrintSerializedTree(data []byte) {
+	for _, b := range data {
+		switch b {
+		case 0:
+			fmt.Print("0 ")
+		case 1:
+			fmt.Print("1 ")
+		default:
+			fmt.Printf("%c ", b)
+		}
+	}
+	fmt.Println()
 }
